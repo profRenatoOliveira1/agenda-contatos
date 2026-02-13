@@ -3,7 +3,7 @@ import type { ContatoDTO } from "../interfaces/ContatoDTO.js";
 
 const database = new DatabaseModel().pool;
 
-class Contato {
+class ContatoAC {
     private idContato: number = 0;
     private nome: string;
     private telefone: string;
@@ -77,7 +77,7 @@ class Contato {
 
     static async cadastrarContato(contato: ContatoDTO): Promise<boolean> {
         try {
-            const queryInsert = `INSERT INTO contatos (nome, telefone, email, endereco, aniversario) 
+            const queryInsert = `INSERT INTO ac_contatos (nome, telefone, email, endereco, aniversario) 
                 VALUES ($1, $2, $3, $4, $5) RETURNING idContato;`;
 
                 const respostaBD = await database.query(queryInsert, [
@@ -102,14 +102,14 @@ class Contato {
 
     static async listarContatos(): Promise<Array<Contato> | null> {
         try {
-            let listaContatos: Array<Contato> = [];
+            let listaContatos: Array<ContatoAC> = [];
 
-            const querySelectContatos = `SELECT * FROM contatos WHERE situacao=TRUE;`;
+            const querySelectContatos = `SELECT * FROM ac_contatos WHERE situacao=TRUE;`;
 
             const respostaBD = await database.query(querySelectContatos);
 
             respostaBD.rows.forEach((contatoDB) => {
-                const novoContato = new Contato(
+                const novoContato = new ContatoAC(
                     contatoDB.nome,
                     contatoDB.telefone,
                     contatoDB.email,
@@ -131,7 +131,7 @@ class Contato {
 
     static async removerContato(idContato: number): Promise<boolean> {
         try {
-            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE idContato = $1;`;
+            const queryRemoveContato = `UPDATE ac_contatos SET situacao=FALSE WHERE idContato = $1;`;
 
             const respostaBD = await database.query(queryRemoveContato, [idContato]);
 
@@ -149,7 +149,7 @@ class Contato {
 
     static async atualizarContato(contato: ContatoDTO): Promise<boolean> {
         try {
-            const queryUpdateContato = `UPDATE contatos SET nome=$1, telefone=$2, email=$3, endereco=$4, aniversario=$5 WHERE idContato=$6;`;
+            const queryUpdateContato = `UPDATE ac_contatos SET nome=$1, telefone=$2, email=$3, endereco=$4, aniversario=$5 WHERE idContato=$6;`;
 
             const respostaBD = await database.query(queryUpdateContato, [
                 contato.nome.toUpperCase(), 
@@ -173,4 +173,4 @@ class Contato {
     }
 }
 
-export default Contato;
+export default ContatoAC;
