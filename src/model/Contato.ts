@@ -1,4 +1,5 @@
 import { DatabaseModel } from "./DatabaseModel.js";
+import type { ContatoDTO } from "../interfaces/ContatoDTO.js";
 
 const database = new DatabaseModel().pool;
 
@@ -74,6 +75,59 @@ class Contato {
         this.aniversario = aniversario;
     }
 
+    static async cadastrarContato(contato: ContatoDTO): Promise<boolean> {
+        try {
+            const queryInsert = `INSERT INTO contatos (nome, telefone, email, endereco, aniversario) 
+                VALUES ($1, $2, $3, $4, $5) RETURNING id_contato;`;
+
+                const respostaBD = await database.query(queryInsert, [
+                    contato.nome.toUpperCase(),
+                    contato.telefone,
+                    contato.email?.toLowerCase(),
+                    contato.endereco?.toUpperCase(),
+                    contato.aniversario
+                ]);
+
+                if(respostaBD.rows.length > 0) {
+                    console.info(`Cliente cadastrado com sucesso. ID cliente: ${respostaBD.rows[0].id_contato}`);
+                    return true;
+                }
+
+                return false;
+        } catch (error) {
+            console.error(`Erro na consulta ao banco de dados. ${error}`);
+            return false;
+        }
+    }
+
+    static async listarContatos(): Promise<Array<Contato> | null> {
+        try {
+            let listaContatos: Array<Contato> = [];
+
+            const querySelectContatos = `SELECT * FROM contatos;`;
+
+            const respostaBD = await database.query(querySelectContatos);
+
+            respostaBD.rows.forEach((contatoDB) => {
+                const novoContato = new Contato(
+                    contatoDB.nome,
+                    contatoDB.telefone,
+                    contatoDB.email,
+                    contatoDB.endereco,
+                    contatoDB.aniversario
+                );
+
+                novoContato.setIdContato(contatoDB.id_contato);
+
+                listaContatos.push(novoContato);
+            });
+
+            return listaContatos;
+        } catch (error) {
+            console.error(`Erro na consulta com o banco de dados. ${error}`);
+            return null;   
+        }
+    }
 }
 
 export default Contato;
