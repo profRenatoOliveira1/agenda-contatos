@@ -19,3 +19,5 @@ INSERT INTO Contato (nome, telefone, email, endereco, aniversario) VALUES
 ('Henriacque Maacrtins', '81910987654', 'henrique.martinsac@email.com', 'Av. Recife ac, 258 - Recife', '1987-06-22'),
 ('Isabelaac Fernandeacs', '91909876543', 'isabelaac.feacrnandes@emacail.com', 'Rua ac Ceará, 369 - Fortaleza', '1994-02-10'),
 ('Joacão Oliacveira', '11912345678', 'joao.oliveira@email.ac.com', 'Rua Paulistaac, 741 - São Paulo', '1989-08-27');
+
+ALTER TABLE Contatos ADD COLUMN situacao BOOLEAN NOT NULL DEFAULT TRUE;
