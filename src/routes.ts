@@ -9,5 +9,6 @@ router.get('/', (req, res) => {
 
 router.post('/api/contato', ContatoController.novo);
 router.get('/api/contato', ContatoController.todos);
+router.delete('/api/contato/:idContato', ContatoController.remover);
 
 export { router };

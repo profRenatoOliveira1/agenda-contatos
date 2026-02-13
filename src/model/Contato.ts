@@ -104,7 +104,7 @@ class Contato {
         try {
             let listaContatos: Array<Contato> = [];
 
-            const querySelectContatos = `SELECT * FROM contatos;`;
+            const querySelectContatos = `SELECT * FROM contatos WHERE situacao=TRUE;`;
 
             const respostaBD = await database.query(querySelectContatos);
 
@@ -126,6 +126,24 @@ class Contato {
         } catch (error) {
             console.error(`Erro na consulta com o banco de dados. ${error}`);
             return null;   
+        }
+    }
+
+    static async removerContato(idContato: number): Promise<boolean> {
+        try {
+            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE id_contato = $1;`;
+
+            const respostaBD = await database.query(queryRemoveContato, [idContato]);
+
+            if(respostaBD.rowCount != 0) {
+                console.info(`Contato removido com sucesso.`);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error(`Erro na consulta com o banco de dados. ${error}`);
+            return false;
         }
     }
 }
