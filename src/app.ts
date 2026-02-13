@@ -1,6 +1,19 @@
-import { server } from "./server.js";
+import express from "express";
+import { DatabaseModel } from "./model/DatabaseModel.js";
+import dotenv from "dotenv";
 
-server.listen('3333', () => {
-    console.clear();
-    console.log("Servidor rodando no endereço http://localhost:3333/");
+dotenv.config();
+
+const router = express.Router();
+
+new DatabaseModel().testeConexao().then((resbd) => {
+    if (resbd) {
+        router.get('/', (req, res) => {
+            res.status(200).json({ mensagem: "Aplicação online.", timestamp: `${new Date().toLocaleString('pt-br')}`, aluno: "copia" });
+        })
+    } else {
+        console.error('Erro ao fazer conexão com o banco de dados.');
+    }
 });
+
+export { router };
