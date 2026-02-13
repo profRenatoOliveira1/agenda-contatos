@@ -4,7 +4,7 @@ import type { ContatoDTO } from "../interfaces/ContatoDTO.js";
 const database = new DatabaseModel().pool;
 
 class Contato {
-    private id_contato: number = 0;
+    private idContato: number = 0;
     private nome: string;
     private telefone: string;
     private email: string;
@@ -27,7 +27,7 @@ class Contato {
 
     // Getters
     public getIdContato(): number {
-        return this.id_contato;
+        return this.idContato;
     }
 
     public getNome(): string {
@@ -52,7 +52,7 @@ class Contato {
 
     // Setters
     public setIdContato(idContato: number): void {
-        this.id_contato = idContato;
+        this.idContato = idContato;
     }
 
     public setNome(nome: string): void {
@@ -78,7 +78,7 @@ class Contato {
     static async cadastrarContato(contato: ContatoDTO): Promise<boolean> {
         try {
             const queryInsert = `INSERT INTO contatos (nome, telefone, email, endereco, aniversario) 
-                VALUES ($1, $2, $3, $4, $5) RETURNING id_contato;`;
+                VALUES ($1, $2, $3, $4, $5) RETURNING idContato;`;
 
                 const respostaBD = await database.query(queryInsert, [
                     contato.nome.toUpperCase(),
@@ -89,7 +89,7 @@ class Contato {
                 ]);
 
                 if(respostaBD.rows.length > 0) {
-                    console.info(`Cliente cadastrado com sucesso. ID cliente: ${respostaBD.rows[0].id_contato}`);
+                    console.info(`Cliente cadastrado com sucesso. ID cliente: ${respostaBD.rows[0].idContato}`);
                     return true;
                 }
 
@@ -131,12 +131,37 @@ class Contato {
 
     static async removerContato(idContato: number): Promise<boolean> {
         try {
-            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE id_contato = $1;`;
+            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE idContato = $1;`;
 
             const respostaBD = await database.query(queryRemoveContato, [idContato]);
 
             if(respostaBD.rowCount != 0) {
                 console.info(`Contato removido com sucesso.`);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error(`Erro na consulta com o banco de dados. ${error}`);
+            return false;
+        }
+    }
+
+    static async atualizarContato(contato: ContatoDTO): Promise<boolean> {
+        try {
+            const queryUpdateContato = `UPDATE contatos SET nome=$1, telefone=$2, email=$3, endereco=$4, aniversario=$5 WHERE idContato=$6;`;
+
+            const respostaBD = await database.query(queryUpdateContato, [
+                contato.nome.toUpperCase(), 
+                contato.telefone, 
+                contato.email?.toLowerCase(), 
+                contato.endereco?.toUpperCase(), 
+                contato.aniversario, 
+                contato.idContato
+            ]);
+
+            if(respostaBD.rowCount != 0) {
+                console.info(`Contato atualizado com sucesso. ID: ${contato.idContato}`);
                 return true;
             }
 
