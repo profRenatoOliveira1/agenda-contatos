@@ -20,6 +20,19 @@ class ContatoController extends Contato {
         }
     }
 
+    static async contato(req: Request, res: Response): Promise<Response> {
+        try {
+            const idContato: number = parseInt(req.params.idContato as string);
+
+            const contato = await Contato.buscarContato(idContato);
+
+            return res.status(200).json(contato);
+        } catch (error) {
+            console.error(`Erro no modelo. ${error}`);
+            return res.status(500).json({ mensagem: "Não foi possível obter informações do contato." });
+        }
+    }
+
     static async todos(req: Request, res: Response): Promise<Response> {
         try {
             const listaContatos: Array<Contato> = await Contato.listarContatos() ?? [];

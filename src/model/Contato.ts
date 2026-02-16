@@ -10,6 +10,7 @@ class Contato {
     private email: string;
     private endereco: string;
     private aniversario: Date;
+    private situacao: boolean = true;
 
     constructor(
         _nome: string,
@@ -50,6 +51,10 @@ class Contato {
         return this.aniversario;
     }
 
+    public getSituacao(): boolean {
+        return this.situacao;
+    }
+
     // Setters
     public setIdContato(idContato: number): void {
         this.idContato = idContato;
@@ -74,22 +79,26 @@ class Contato {
     public setAniversario(aniversario: Date): void {
         this.aniversario = aniversario;
     }
+    
+    public setSituacao(situacao: boolean): void {
+        this.situacao = situacao;
+    }
 
     static async cadastrarContato(contato: ContatoDTO): Promise<boolean> {
         try {
             const queryInsert = `INSERT INTO contatos (nome, telefone, email, endereco, aniversario) 
-                VALUES ($1, $2, $3, $4, $5) RETURNING idContato;`;
+                VALUES ($1, $2, $3, $4, $5) RETURNING id_contato;`;
 
                 const respostaBD = await database.query(queryInsert, [
                     contato.nome.toUpperCase(),
                     contato.telefone,
                     contato.email?.toLowerCase(),
                     contato.endereco?.toUpperCase(),
-                    contato.aniversario
+                    contato.aniversario ? contato.aniversario.toISOString().split('T')[0] : null
                 ]);
 
                 if(respostaBD.rows.length > 0) {
-                    console.info(`Cliente cadastrado com sucesso. ID cliente: ${respostaBD.rows[0].idContato}`);
+                    console.info(`Cliente cadastrado com sucesso. ID cliente: ${respostaBD.rows[0].id_contato}`);
                     return true;
                 }
 
@@ -129,9 +138,33 @@ class Contato {
         }
     }
 
+    static async buscarContato(idContato: number): Promise<Contato | null> {
+        try {
+            const querySelectContato = `SELECT * FROM contatos WHERE id_contato=$1 AND situacao=TRUE;`;
+
+            const respostaBD = await database.query(querySelectContato, [idContato]);
+
+            const novoContato: Contato = new Contato(
+                respostaBD.rows[0].nome,                
+                respostaBD.rows[0].telefone,                
+                respostaBD.rows[0].email,                
+                respostaBD.rows[0].endereco,                
+                respostaBD.rows[0].aniversario,
+            );
+
+            novoContato.setIdContato(respostaBD.rows[0].id_contato);
+            novoContato.setSituacao(respostaBD.rows[0].situacao);
+
+            return novoContato;
+        } catch (error) {
+            console.error(`Erro na consulta ao banco de dados. ${error}`);
+            return null;
+        }
+    }
+
     static async removerContato(idContato: number): Promise<boolean> {
         try {
-            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE idContato = $1;`;
+            const queryRemoveContato = `UPDATE contatos SET situacao=FALSE WHERE id_contato = $1;`;
 
             const respostaBD = await database.query(queryRemoveContato, [idContato]);
 
@@ -149,8 +182,19 @@ class Contato {
 
     static async atualizarContato(contato: ContatoDTO): Promise<boolean> {
         try {
-            const queryUpdateContato = `UPDATE contatos SET nome=$1, telefone=$2, email=$3, endereco=$4, aniversario=$5 WHERE idContato=$6;`;
+            console.log(contato);
 
+            const queryUpdateContato = `UPDATE contatos SET nome=$1, telefone=$2, email=$3, endereco=$4, aniversario=$5 WHERE id_contato=$6;`;
+
+            console.log(queryUpdateContato, [
+                contato.nome.toUpperCase(), 
+                contato.telefone, 
+                contato.email?.toLowerCase(), 
+                contato.endereco?.toUpperCase(), 
+                contato.aniversario, 
+                contato.idContato
+            ]);
+            
             const respostaBD = await database.query(queryUpdateContato, [
                 contato.nome.toUpperCase(), 
                 contato.telefone, 
