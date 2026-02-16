@@ -1,8 +1,8 @@
 import type { ContatoDTO } from "../interfaces/ContatoDTO.js";
-import Contato from "../model/Contato.js";
+import ContatoAC from "../model/Contato.js";
 import { type Request, type Response } from "express";
 
-class ContatoController extends Contato {
+class ContatoController extends ContatoAC {
     static async novo(req: Request, res: Response): Promise<Response> {
         try {
             const dadosContatoRecebido: ContatoDTO  = req.body;

@@ -113,12 +113,12 @@ class Contato {
         try {
             let listaContatos: Array<Contato> = [];
 
-            const querySelectContatos = `SELECT * FROM contatos WHERE situacao=TRUE;`;
+            const querySelectContatos = `SELECT * FROM ac_contatos WHERE situacao=TRUE;`;
 
             const respostaBD = await database.query(querySelectContatos);
 
             respostaBD.rows.forEach((contatoDB) => {
-                const novoContato = new Contato(
+                const novoContato = new Contato (
                     contatoDB.nome,
                     contatoDB.telefone,
                     contatoDB.email,
